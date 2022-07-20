@@ -10,6 +10,7 @@ router.use("/v1/user", require("./v1/users"));
 router.use("/v1/stocks", auth, require("./v1/stocks"));
 router.use("/v1/orders", auth, require("./v1/orders"));
 router.use("/v1/images", auth, require("./v1/images"));
+router.use("/v1/reports", auth, require("./v1/reports"));
 
 /**
  * @Support
@@ -77,7 +78,10 @@ router.get("/list", (req, res) => {
     if (errU) return returnError(res, errU.message);
     connection.query("SELECT * FROM stocks;", (errS, stock) => {
       if (errS) return returnError(res, errS.message);
-      return returnSuccess(res, { user, stock });
+      connection.query("SELECT * FROM orders;", (errO, order) => {
+        if (errO) return returnError(res, errO.message);
+        return returnSuccess(res, { user, stock, order });
+      });
     });
   });
 });
