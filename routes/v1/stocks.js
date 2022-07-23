@@ -19,6 +19,7 @@ router.post("/add-new", (req, res) => {
       //Register User
       connection.query("INSERT INTO stocks SET ?", body, (error, result) => {
         if (error) return returnError(res);
+        connection.end();
         return returnSuccess(res, body, "Stock added successfully.");
       });
     }
@@ -34,6 +35,7 @@ router.post("/update", (req, res) => {
     [body.name, body.price, body.quantity, body.id],
     (error, result) => {
       if (error) return returnError(res);
+      connection.end();
       return returnSuccess(res, body, "Stock updated successfully.");
     }
   );
@@ -45,6 +47,7 @@ router.get("/delete/:id", (req, res) => {
     [req.params.id],
     (error, result) => {
       if (error) return returnError(res);
+      connection.end();
       return returnSuccess(res, {}, "Stock removed successfully.");
     }
   );
@@ -56,6 +59,7 @@ router.get("/get-stocks/:userId", (req, res) => {
     [req.params.userId],
     (err, result) => {
       if (err) return returnError(res, err.message);
+      connection.end();
       return returnSuccess(res, result);
     }
   );

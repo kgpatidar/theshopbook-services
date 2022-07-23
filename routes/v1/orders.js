@@ -45,6 +45,7 @@ router.post("/place-new", (req, res) => {
       connection.query("INSERT INTO orders SET ?", body, (error, result) => {
         if (error) return returnError(res);
         // * Send Notification to wholeseller.
+        connection.end();
         return returnSuccess(res, body, "Order requested to wholeseller.");
       });
     }
@@ -60,6 +61,7 @@ router.get("/get-orders/:wholesellerId/:status", (req, res) => {
       [wholesellerId],
       (error, result) => {
         if (error) return returnError(res);
+        connection.end();
         return returnSuccess(res, result);
       }
     );
@@ -69,6 +71,7 @@ router.get("/get-orders/:wholesellerId/:status", (req, res) => {
       [wholesellerId, status],
       (error, result) => {
         if (error) return returnError(res);
+        connection.end();
         return returnSuccess(res, result);
       }
     );

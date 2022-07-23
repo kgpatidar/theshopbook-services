@@ -12,6 +12,7 @@ router.post("/generate", (req, res) => {
     [wholesalerId, body.startDate, body.endDate],
     async (err, result) => {
       if (err) return returnError(res);
+      connection.end();
       return returnSuccess(res, result);
     }
   );

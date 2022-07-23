@@ -28,6 +28,7 @@ router.post("/login", (req, res) => {
       user.token = jwt.sign({ userId: user.id }, process.env.SECRET_KEY, {
         expiresIn: 999999999999,
       });
+      connection.end();
       return returnSuccess(res, user);
     }
   );
@@ -64,6 +65,7 @@ router.post("/register", (req, res) => {
       connection.query("INSERT INTO users SET ?", body, (error, result) => {
         if (err) return returnError(res);
         delete body.password;
+        connection.end();
         return returnSuccess(res, body, "Registration successfull.");
       });
     }
@@ -85,6 +87,7 @@ router.post("/add-retailer", auth, (req, res) => {
       body.password = await bcrypt.hash(body.password, 10);
       connection.query("INSERT INTO users SET ?", body, (error, result) => {
         if (err) return returnError(res);
+        connection.end();
         return returnSuccess(res, body, "User registered successfully.");
       });
     }
@@ -97,6 +100,7 @@ router.get("/get-retailers", auth, (req, res) => {
     [req.userId],
     (err, result) => {
       if (err) return returnError(res, err.message);
+      connection.end();
       return returnSuccess(res, result);
     }
   );
