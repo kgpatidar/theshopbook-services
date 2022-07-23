@@ -8,8 +8,8 @@ router.post("/generate", (req, res) => {
   const body = req.body;
   const wholesalerId = req.userId;
   connection.query(
-    "SELECT * FROM orders WHERE wholesellerId = ? AND time >= ? AND time <= ?",
-    [wholesalerId, body.startTime, body.endTime],
+    "SELECT * FROM orders WHERE wholesellerId = ? AND time >= ? AND time <= ?;",
+    [wholesalerId, body.startDate, body.endDate],
     async (err, result) => {
       if (err) return returnError(res);
       return returnSuccess(res, result);
