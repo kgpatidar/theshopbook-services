@@ -1,5 +1,6 @@
 const express = require("express");
 const connection = require("../../config/connection");
+const { sendNotificationToAllSubscribe } = require("../../helper/notification");
 const returnError = require("../../helper/returnError");
 const returnSuccess = require("../../helper/returnSuccess");
 const router = express.Router();
@@ -44,8 +45,10 @@ router.post("/place-new", (req, res) => {
       body.price = stockBody.price;
       connection.query("INSERT INTO orders SET ?", body, (error, result) => {
         if (error) return returnError(res);
-        // * Send Notification to wholeseller.
-        connection.end();
+        sendNotificationToAllSubscribe(body.wholesellerId, {
+          title: "New Order",
+          body: "Hey! Please check new order.",
+        });
         return returnSuccess(res, body, "Order requested to wholeseller.");
       });
     }
@@ -61,7 +64,7 @@ router.get("/get-orders/:wholesellerId/:status", (req, res) => {
       [wholesellerId],
       (error, result) => {
         if (error) return returnError(res);
-        connection.end();
+
         return returnSuccess(res, result);
       }
     );
@@ -71,11 +74,25 @@ router.get("/get-orders/:wholesellerId/:status", (req, res) => {
       [wholesellerId, status],
       (error, result) => {
         if (error) return returnError(res);
-        connection.end();
+
         return returnSuccess(res, result);
       }
     );
   }
+});
+
+router.get("/get-orders/retailer/:wholesellerId/:retailerId", (req, res) => {
+  const wholesellerId = req.params.wholesellerId;
+  const retailerId = req.params.retailerId;
+  connection.query(
+    "SELECT * FROM orders WHERE wholesellerId = ? AND retailerId = ? ORDER BY time DESC;",
+    [wholesellerId, retailerId],
+    (error, result) => {
+      if (error) return returnError(res);
+
+      return returnSuccess(res, result);
+    }
+  );
 });
 
 router.post("/confirm-order", (req, res) => {
@@ -129,6 +146,10 @@ router.post("/confirm-order", (req, res) => {
                 (updateError, updateResult) => {
                   if (updateError) return returnError(res);
                   // * Send Notification to reseller.
+                  sendNotificationToAllSubscribe(orderBody.retailerId, {
+                    title: "Order Update",
+                    body: `Your Order ID : #${body.orderId} is confirmed(Order Name: ${stockBody.name}).`,
+                  });
                   return returnSuccess(
                     res,
                     body,
@@ -165,6 +186,10 @@ router.get("/cancel-order/:orderId", (req, res) => {
         (updateError, updateResult) => {
           if (updateError) return returnError(res);
           // * Send Notification to reseller.
+          sendNotificationToAllSubscribe(checkResult[0].retailerId, {
+            title: "Order Update",
+            body: `Your Order ID : #${req.params.orderId} is cancelled.`,
+          });
           return returnSuccess(
             res,
             { status: orderStatus.CANCELED, orderId: req.params.orderId },
@@ -207,6 +232,12 @@ router.post("/update-order-status", (req, res) => {
             (updateError, updateResult) => {
               if (updateError) return returnError(res);
               // * Send Notification to reseller.
+              sendNotificationToAllSubscribe(checkResult[0].retailerId, {
+                title: "Order Update",
+                body: `Your Order ID : #${
+                  body.orderId
+                } is ${body.status.toLowerCase()}.`,
+              });
               return returnSuccess(
                 res,
                 body,

@@ -12,7 +12,22 @@ router.post("/generate", (req, res) => {
     [wholesalerId, body.startDate, body.endDate],
     async (err, result) => {
       if (err) return returnError(res);
-      connection.end();
+
+      return returnSuccess(res, result);
+    }
+  );
+});
+
+router.post("/generate-retailer", (req, res) => {
+  const body = req.body;
+  const wholesalerId = body.wholesalerId;
+  const retailerId = body.retailerId;
+  connection.query(
+    "SELECT * FROM orders WHERE wholesellerId = ? AND retailerId = ? AND time >= ? AND time <= ?;",
+    [wholesalerId, retailerId, body.startDate, body.endDate],
+    async (err, result) => {
+      if (err) return returnError(res);
+
       return returnSuccess(res, result);
     }
   );

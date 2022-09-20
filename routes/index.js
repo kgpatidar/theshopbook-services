@@ -3,10 +3,12 @@ const connection = require("../config/connection");
 const auth = require("../config/middleware");
 const returnError = require("../helper/returnError");
 const returnSuccess = require("../helper/returnSuccess");
+const { route } = require("./v1/notification");
 const router = express.Router();
 
 /** @V1 Routing */
 router.use("/v1/user", require("./v1/users"));
+router.use("/v1/notification", auth, require("./v1/notification"));
 router.use("/v1/stocks", auth, require("./v1/stocks"));
 router.use("/v1/orders", auth, require("./v1/orders"));
 router.use("/v1/images", auth, require("./v1/images"));
@@ -67,6 +69,23 @@ router.get("/create/orders", async (req, res) => {
               });
             }
           );
+        });
+      }
+    );
+  });
+});
+
+router.get("/create/notification", async (req, res) => {
+  connection.query("DROP TABLE IF EXISTS notification; ", () => {
+    connection.query(
+      "CREATE TABLE notification (id INT AUTO_INCREMENT PRIMARY KEY, userId INT, endpoint TEXT);",
+      (error, result) => {
+        if (error) {
+          return res.status(400).send({ ok: false, message: error.message });
+        }
+        return res.send({
+          ok: true,
+          message: "Notification table created successfully.",
         });
       }
     );

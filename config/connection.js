@@ -8,9 +8,10 @@ const db = {
   connectTimeout: 30000,
 };
 
-const connection = mysql.createConnection(db);
-connection.connect((err) =>
-  console.log(err ? "Error : " + err : "Database connected.")
-);
+const connection = mysql.createPool(db);
+
+// connection.connect((err) =>
+//   console.log(err ? "Error : " + err : "Database connected.")
+// );
 
 module.exports = connection;
