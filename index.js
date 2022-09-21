@@ -16,6 +16,6 @@ app.get("/", (req, res) => {
 // Main routes
 app.use("/", require("./routes/index"));
 
-app.listen(process.env.PORT, () => {
+app.listen(process.env.PORT || 5000, () => {
   console.log(`Server started.`);
 });
