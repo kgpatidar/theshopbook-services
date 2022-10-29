@@ -78,7 +78,7 @@ router.get("/create/orders", async (req, res) => {
 router.get("/create/notification", async (req, res) => {
   connection.query("DROP TABLE IF EXISTS notification; ", () => {
     connection.query(
-      "CREATE TABLE notification (id INT AUTO_INCREMENT PRIMARY KEY, userId INT, endpoint TEXT);",
+      "CREATE TABLE notification (id INT AUTO_INCREMENT PRIMARY KEY, userId INT, sessionToken VARCHAR(40), endpoint TEXT);",
       (error, result) => {
         if (error) {
           return res.status(400).send({ ok: false, message: error.message });
