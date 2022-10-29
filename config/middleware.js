@@ -8,6 +8,7 @@ const auth = (req, res, next) => {
         return returnError(res, "Invalid User", 403);
       } else {
         req.userId = decodedToken.userId;
+        req.sessionToken = decodedToken.sessionToken;
         next();
       }
     });

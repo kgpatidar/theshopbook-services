@@ -11,6 +11,7 @@ const {
 } = require("../../helper/emailTemplate");
 const auth = require("../../config/middleware");
 const router = express.Router();
+const crypto = require("crypto");
 
 router.post("/login", (req, res) => {
   let body = req.body;
@@ -25,9 +26,14 @@ router.post("/login", (req, res) => {
       if (!(await bcrypt.compare(body.password, user.password)))
         return returnError(res, "Invalid email or password.");
       delete user.password;
-      user.token = jwt.sign({ userId: user.id }, process.env.SECRET_KEY, {
-        expiresIn: 999999999999,
-      });
+      const sessionToken = crypto.randomBytes(16).toString("hex");
+      user.token = jwt.sign(
+        { userId: user.id, sessionToken },
+        process.env.SECRET_KEY,
+        {
+          expiresIn: 999999999999,
+        }
+      );
 
       return returnSuccess(res, user);
     }

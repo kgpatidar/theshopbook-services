@@ -19,11 +19,15 @@ const getUserEndpoints = async (userId) => {
 
 router.post("/subscribe", async (req, res) => {
   const userId = req.userId;
+  const sessionToken = req.sessionToken;
   const endpoint = JSON.stringify(req.body);
 
+  if (!endpoint || endpoint.length === 0 || endpoint === "{}")
+    return returnError(res, "Endpoint not found!");
+
   connection.query(
-    "SELECT * FROM notification WHERE userId = ? AND endpoint = ?;",
-    [userId, endpoint],
+    "SELECT * FROM notification WHERE userId = ? AND sessionToken = ?;",
+    [userId, sessionToken],
     (err, endpointResults) => {
       if (err) return returnError(res);
       if (endpointResults && endpointResults.length > 0) {
@@ -31,7 +35,7 @@ router.post("/subscribe", async (req, res) => {
       }
       connection.query(
         "INSERT INTO notification SET ?;",
-        { userId, endpoint },
+        { userId, sessionToken, endpoint },
         (error, result) => {
           if (error) return returnError(res, "Something went wrong!");
           return returnSuccess(
@@ -44,11 +48,11 @@ router.post("/subscribe", async (req, res) => {
   );
 });
 
-const unsubscriptEndpoint = (userId, endpoint) => {
+const unsubscriptEndpoint = (sessionToken) => {
   return new Promise((resolve, reject) => {
     connection.query(
-      "DELETE FROM notification WHERE userId = ? AND endpoint = ?",
-      [userId, JSON.stringify(endpoint)],
+      "DELETE FROM notification WHERE sessionToken = ?",
+      [sessionToken],
       (error, result) => {
         if (error) return reject(error);
         return resolve(result);
@@ -57,10 +61,9 @@ const unsubscriptEndpoint = (userId, endpoint) => {
   });
 };
 
-router.post("/unsubscribe", async (req, res) => {
-  const userId = req.userId;
-  const endpoint = req.body;
-  unsubscriptEndpoint(userId, endpoint)
+router.get("/unsubscribe", async (req, res) => {
+  const sessionToken = req.sessionToken;
+  unsubscriptEndpoint(sessionToken)
     .then(() => {
       return returnSuccess(res, "Unsubscribed successfully!");
     })
